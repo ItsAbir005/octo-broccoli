@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import { WebSocketServer } from "ws";
 import {Request,Response,NextFunction} from "express";
+import globalErrorHandler from "./error/GlobalError";
 const app = express();
 const server = http.createServer(app);
 
@@ -17,15 +18,6 @@ wss.on("connection", (ws) => {
 app.get("/error-test", () => {
   throw new Error("Test server failure");
 });
-app.use(
-  (err: any,req: Request,res: Response,next: NextFunction) => {
-    console.error("Error Log:", err.message);
-    res.status(500).json({
-      success: false,
-      error: "Something went wrong on server",
-    });
-  }
-);
 server.listen(8080, () => {
   console.log("Server started on port 8080",{url: "http://localhost:8080"});
 });
