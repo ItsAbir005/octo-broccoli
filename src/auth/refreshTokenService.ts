@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 import AppError from "../error/AppError";
+import dotenv from "dotenv";
+dotenv.config();
 
 const REFRESH_SECRET = process.env.JWT_REFRESH!;
 const ACCESS_SECRET = process.env.JWT_ACCESS!;

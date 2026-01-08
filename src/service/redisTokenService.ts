@@ -12,6 +12,11 @@ export const isRefreshTokenValid = async (token: string) => {
   const user = await redis.get(`refresh:${token}`);
   return user !== null;
 };
+export const getUserIdFromRefresh = async (token: string) => {
+  const userId = await redis.get(`refresh:${token}`);
+  if (!userId) throw new AppError("Refresh token not found", 403);
+  return userId;
+};
 export const deleteRefreshToken = async (token: string) => {
   await redis.del(`refresh:${token}`);
 }

@@ -10,6 +10,7 @@ import AppError from "./error/AppError";
 import { requestLogger } from "./middleware/logger.middleware";
 import { asyncWrapper } from "./middleware/asyncWarpper";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "./auth/refreshTokenService";
+import { deleteRefreshToken,saveRefreshToken, getUserIdFromRefresh } from "./service/redisTokenService";
 const app = express();
 app.use(cors());
 app.use(cookieParser());
@@ -18,7 +19,6 @@ app.use(requestLogger);
 dotenv.config();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: "/ws" });
-let validRefreshTokens = new Set<string>(); 
 wss.on("connection", (ws) => {
   ws.send("Connected to WebSocket");
 });
@@ -27,24 +27,32 @@ app.get("/error", asyncWrapper(async (req: Request, res: Response, next: NextFun
 }));
 app.post("/refresh", asyncWrapper(async (req, res) => {
   const { token } = req.body;
-  if (!token || !validRefreshTokens.has(token)) {
+  if (!token || !await getUserIdFromRefresh(token)) {
     throw new AppError("Refresh token reuse or not recognized", 403);
   }
   const payload = verifyRefreshToken(token);
   const newAccess = generateAccessToken(payload.id);
   const newRefresh = generateRefreshToken(payload.id);
 
-  validRefreshTokens.delete(token);
-  validRefreshTokens.add(newRefresh);
+  await deleteRefreshToken(token);
+  await saveRefreshToken(newRefresh, payload.id);
 
   res.json({ accessToken: newAccess, refreshToken: newRefresh });
 }));
-app.post("/temp-login", (req, res) => {
+app.post("/temp-login", async (req, res) => {
   const access = generateAccessToken("19");
   const refresh = generateRefreshToken("19");
-  validRefreshTokens.add(refresh);
+  await saveRefreshToken(refresh, "19");
   res.json({ access, refresh });
 });
+app.post("/logout", asyncWrapper(async (req, res) => {
+  const { token } = req.body;
+  if (!token) throw new AppError("Refresh token required", 400);
+  const userId = await getUserIdFromRefresh(token);
+  await deleteRefreshToken(token);
+
+  res.json({ success: true, message: "Logged out safely" });
+}));
 server.listen(8080, () => {
   console.log("Server started on port 8080",{url: "http://localhost:8080"});
 });
