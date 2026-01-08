@@ -11,6 +11,8 @@ import { requestLogger } from "./middleware/logger.middleware";
 import { asyncWrapper } from "./middleware/asyncWarpper";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "./auth/refreshTokenService";
 import { deleteRefreshToken,saveRefreshToken, getUserIdFromRefresh } from "./service/redisTokenService";
+import { StatusCode } from "./constants/statusCodes";
+import { apiSuccess } from "./utils/apiResponse";
 const app = express();
 app.use(cors());
 app.use(cookieParser());
@@ -53,6 +55,10 @@ app.post("/logout", asyncWrapper(async (req, res) => {
 
   res.json({ success: true, message: "Logged out safely" });
 }));
+app.get("/status-test", (req, res) => {
+  apiSuccess(res, { service: "running" }, "Service is healthy", StatusCode.OK);
+});
+
 server.listen(8080, () => {
   console.log("Server started on port 8080",{url: "http://localhost:8080"});
 });
