@@ -14,12 +14,16 @@ import { deleteRefreshToken,saveRefreshToken, getUserIdFromRefresh } from "./ser
 import { StatusCode } from "./constants/statusCodes";
 import { apiSuccess } from "./utils/apiResponse";
 import { requestId } from "./middleware/requestId";
+import { compress } from "./middleware/compressionMiddleware";
+import { validate } from "./middleware/validate";
+import { testSchema } from "./validation/testSchema";
 const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(requestId);
 app.use(logger);
+app.use(compress);
 dotenv.config();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: "/ws" });
@@ -59,6 +63,9 @@ app.post("/logout", asyncWrapper(async (req, res) => {
 }));
 app.get("/status-test", (req, res) => {
   apiSuccess(res, { service: "running" }, "Service is healthy", StatusCode.OK);
+});
+app.post("/zod-test", validate(testSchema), (req, res) => {
+  res.json({ success: true, data: req.body });
 });
 
 server.listen(8080, () => {
