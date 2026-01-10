@@ -18,6 +18,7 @@ import { compress } from "./middleware/compressionMiddleware";
 import { validate } from "./middleware/validate";
 import { testSchema } from "./validation/testSchema";
 import { authRateLimiter } from "./middleware/rateLimiter";
+import { healthCheck, readinessCheck } from "./health/healthController";
 const app = express();
 app.use(cors());
 app.use(cookieParser());
@@ -69,6 +70,8 @@ app.post("/zod-test", validate(testSchema), (req, res) => {
   res.json({ success: true, data: req.body });
 });
 
+app.get("/health", healthCheck);
+app.get("/readiness", readinessCheck);
 server.listen(8080, () => {
   console.log("Server started on port 8080",{url: "http://localhost:8080"});
 });
