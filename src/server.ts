@@ -17,6 +17,7 @@ import { requestId } from "./middleware/requestId";
 import { compress } from "./middleware/compressionMiddleware";
 import { validate } from "./middleware/validate";
 import { testSchema } from "./validation/testSchema";
+import { authRateLimiter } from "./middleware/rateLimiter";
 const app = express();
 app.use(cors());
 app.use(cookieParser());
@@ -33,7 +34,7 @@ wss.on("connection", (ws) => {
 app.get("/error", asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
   throw new AppError("This is a test error", 500);
 }));
-app.post("/refresh", asyncWrapper(async (req, res) => {
+app.post("/refresh",authRateLimiter, asyncWrapper(async (req, res) => {
   const { token } = req.body;
   if (!token || !await getUserIdFromRefresh(token)) {
     throw new AppError("Refresh token reuse or not recognized", 403);
@@ -47,7 +48,7 @@ app.post("/refresh", asyncWrapper(async (req, res) => {
 
   res.json({ accessToken: newAccess, refreshToken: newRefresh });
 }));
-app.post("/temp-login", async (req, res) => {
+app.post("/temp-login",authRateLimiter, async (req, res) => {
   const access = generateAccessToken("19");
   const refresh = generateRefreshToken("19");
   await saveRefreshToken(refresh, "19");
