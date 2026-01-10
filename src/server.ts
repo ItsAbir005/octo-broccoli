@@ -3,7 +3,6 @@ import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { WebSocketServer } from "ws";
 import {Request,Response,NextFunction} from "express";
 import globalErrorHandler from "./error/GlobalError";
 import AppError from "./error/AppError";
@@ -70,7 +69,8 @@ app.post("/zod-test", validate(testSchema), (req, res) => {
 
 app.get("/health", healthCheck);
 app.get("/readiness", readinessCheck);
+app.use(globalErrorHandler);
 server.listen(8080, () => {
   console.log("Server started on port 8080",{url: "http://localhost:8080"});
 });
-app.use(globalErrorHandler);
+
