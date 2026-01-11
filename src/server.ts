@@ -19,6 +19,8 @@ import { testSchema } from "./validation/testSchema";
 import { authRateLimiter } from "./middleware/rateLimiter";
 import { healthCheck, readinessCheck } from "./health/healthController";
 import { initWebSocket } from "./ws/socketServer";
+import "./queue/redisSubscriber";
+import { notifyUser } from "./controllers/notifyController";
 const app = express();
 app.use(cors());
 app.use(cookieParser());
@@ -66,7 +68,7 @@ app.get("/status-test", (req, res) => {
 app.post("/zod-test", validate(testSchema), (req, res) => {
   res.json({ success: true, data: req.body });
 });
-
+app.post("/notify", notifyUser);
 app.get("/health", healthCheck);
 app.get("/readiness", readinessCheck);
 app.use(globalErrorHandler);
