@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { AppError } from "../error/AppError";
+import AppError from "../error/AppError";
 
 const ACCESS_SECRET = process.env.JWT_ACCESS!;
 
