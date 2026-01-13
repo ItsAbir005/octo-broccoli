@@ -1,10 +1,13 @@
 import { createClient } from "redis";
+
 const publisher = createClient({
-  url: "redis://redis:6379",
+  url: `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}`,
 });
+
 publisher.on("error", (err) => {
   console.error("Redis Publisher Error", err);
 });
+
 (async () => {
   await publisher.connect();
 })();

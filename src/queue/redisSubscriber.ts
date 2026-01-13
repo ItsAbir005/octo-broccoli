@@ -3,7 +3,7 @@ import { clients } from "../ws/socketServer";
 import { logger } from "../middleware/logger.middleware";
 
 const subscriber = createClient({
-  url: "redis://redis:6379",
+  url: `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}`,
 });
 
 subscriber.on("error", (err) => {
