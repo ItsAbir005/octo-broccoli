@@ -1,4 +1,4 @@
-Real-time Notification Service
+# Real-time Notification Service
 A production-ready Node.js/TypeScript backend service with WebSocket support, Redis pub/sub, JWT authentication, and comprehensive middleware stack.
 Features
 
